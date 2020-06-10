@@ -2,7 +2,8 @@
   "name": "glasnostic-api",
   "version": "1.0.0",
   "description": "",
-  "main": "glasnostic-api.js",
+  "files": ["dist/**/*"],
+  "main": "dist/glasnostic-api.js",
   "scripts": {
     "build": "tsc",
     "build:example": "tsc -p example/tsconfig.json",
