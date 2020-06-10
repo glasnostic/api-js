@@ -9,8 +9,9 @@ const isViewEqual = (a: GlasnosticView, b: GlasnosticView): boolean => {
 
 (async () => {
   const api = new GlasnosticConsole({
-    username: 'zjwu-console2',
-    password: 'aaaaaa1'
+    // use the same credentials that you are using to sign in to https://glasnostic.com/signin
+    username: 'testuser',
+    password: 'changeme'
   });
   const { username } = await api.login();
   console.log(`logged as ${username}`);
