@@ -1,6 +1,12 @@
 import { CookieJar } from 'tough-cookie';
 import { default as got } from 'got';
-import { isNil, cloneDeep } from 'lodash';
+import { isNil } from 'lodash';
+import { PolicyHistory } from './policy-history';
+import { Policies } from './policies';
+
+export * from './policies';
+export * from './metric-types';
+export * from './policy-history';
 
 const defaultBaseDomain = 'https://glasnostic.com';
 
@@ -42,65 +48,6 @@ export interface GlasnosticView {
     modifiedAt?: string;
     committedAt?: string;
     commitId?: string;
-}
-
-export interface Policy {
-    createdAt?: string;
-    policyValue: number;
-    deletedAt?: string;
-}
-
-export type MetricTypes = 'requests' | 'latency' | 'concurrency' | 'bandwidth';
-
-export namespace MetricTypes {
-    export const types: MetricTypes[] = ['requests', 'latency', 'concurrency', 'bandwidth'];
-    export const index: { [m in MetricTypes]: number } = {requests: 0, latency: 1, concurrency: 2, bandwidth: 3};
-}
-
-export type PolicyHistory = {
-    [m in MetricTypes]?: Array<Policy>;
-}
-
-export type Policies = {
-    [m in MetricTypes]?: Policy;
-};
-
-export namespace Policies {
-    export const merge = (a: Policies, b: Policies) => {
-        const policies: Policies = {};
-        for (const t of MetricTypes.types) {
-            const aPolicy = a[t];
-            const bPolicy = b[t];
-            if (bPolicy) {
-                policies[t] = { policyValue: bPolicy.policyValue };
-                continue;
-            }
-            if (aPolicy) {
-                policies[t] = { policyValue: aPolicy.policyValue };
-            }
-        }
-        return policies;
-    }
-}
-
-export namespace PolicyHistory {
-    export const getLatestPolicy = (history: PolicyHistory, type: MetricTypes): Policy | undefined => {
-        const policy = history[type];
-        if (!policy) {
-            return undefined;
-        }
-        return policy.find(p => isNil(p.deletedAt));
-    }
-    export const activePolicies = (history: PolicyHistory): Policies => {
-        const policies: Policies = {};
-        for (const t of MetricTypes.types) {
-            const p = PolicyHistory.getLatestPolicy(history, t);
-            if (p) {
-                policies[t] = cloneDeep(p);
-            }
-        }
-        return policies;
-    }
 }
 
 export class GlasnosticConsole {
@@ -222,8 +169,10 @@ export class GlasnosticConsole {
             clients: originalView.clients,
             services: originalView.services,
             handlers: originalView.handlers,
-            policies: originalView.policyHistory ? PolicyHistory.activePolicies(originalView.policyHistory) : {},
-            commitId: originalView.commitId
+            policies: originalView.policyHistory
+                ? PolicyHistory.activePolicies(originalView.policyHistory)
+                : {},
+            commitId: originalView.commitId,
         };
         if (originalView.policyHistory) {
             view.policies = PolicyHistory.activePolicies(originalView.policyHistory);
