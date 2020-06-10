@@ -7,13 +7,15 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": { "node": ">= 10.0.0" },
   "author": "zjwu <zjwu@glasnostic.com>",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/form-data": "^2.5.0",
     "@types/lodash": "^4.14.155",
     "@types/tough-cookie": "^4.0.0",
+    "prettier": "^2.0.5",
     "tslint": "^6.1.2",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.9.3"
   },
   "dependencies": {
