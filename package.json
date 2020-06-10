@@ -5,6 +5,8 @@
   "main": "glasnostic-api.js",
   "scripts": {
     "build": "tsc",
+    "format": "tslint --force --fix -p . && prettier --write src/**/*",
+    "lint": "tslint -p . && prettier -c src/**/*",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": { "node": ">= 10.0.0" },
