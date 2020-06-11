@@ -17,8 +17,8 @@ Build
 output will be in the `dist` folder. Examples will be in the `example/build`
 folder.
 
-Run Example
------------
+Run Examples
+-----------s
 
 ```
 node example/build/example/create-view.js
