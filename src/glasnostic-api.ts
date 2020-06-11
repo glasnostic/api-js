@@ -5,12 +5,14 @@ import { PolicyHistory } from './policy-history';
 import { Policies } from './policies';
 import { GlasnosticView } from './view';
 import { GlasnosticEnvironment } from './environment';
+import { MetricsResponse } from './metrics';
 
 export * from './policies';
 export * from './metric-types';
 export * from './policy-history';
 export * from './view';
 export * from './environment';
+export * from './metrics';
 
 const defaultBaseDomain = 'https://glasnostic.com';
 
@@ -225,5 +227,21 @@ export class GlasnosticConsole {
 
         const resultView = await got.post(commitUrl, option).json<GlasnosticView>();
         return action === GlasnosticCommitAction.delete ? undefined : resultView;
+    }
+
+    async getMetrics(environmentKey: string, samplePeriod?: number, duration?: number, start?: number): Promise<MetricsResponse> {
+        const metricsUrl = new URL('/api/metrics/assembly', this.apiDomain);
+        metricsUrl.searchParams.set('key', environmentKey);
+        if (!isNil(start)) {
+            metricsUrl.searchParams.set('start', start + '');
+        }
+        if (!isNil(duration)) {
+            metricsUrl.searchParams.set('duration', duration + '');
+        }
+        if (!isNil(samplePeriod)) {
+            metricsUrl.searchParams.set('samplePeriod', samplePeriod + '');
+        }
+
+        return await got.get(metricsUrl, { cookieJar: this.cookieJar }).json<MetricsResponse>();
     }
 }
