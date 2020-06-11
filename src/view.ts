@@ -1,6 +1,6 @@
 import { PolicyHistory } from './policy-history';
 
-export interface GlasnosticView {
+export interface View {
     clients: string;
     services: string;
     name?: string;

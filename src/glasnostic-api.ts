@@ -3,8 +3,8 @@ import { default as got } from 'got';
 import { isNil } from 'lodash';
 import { PolicyHistory } from './policy-history';
 import { Policies } from './policies';
-import { GlasnosticView } from './view';
-import { GlasnosticEnvironment } from './environment';
+import { View } from './view';
+import { Environment } from './environment';
 import { MetricsResponse } from './metrics';
 
 export * from './policies';
@@ -16,13 +16,13 @@ export * from './metrics';
 
 const defaultBaseDomain = 'https://glasnostic.com';
 
-enum GlasnosticCommitAction {
+enum CommitAction {
     create = 1,
     update = 2,
     delete = 3,
 }
 
-interface GlasnosticViewSnapshot {
+interface ViewSnapshot {
     clients: string;
     services: string;
     name?: string;
@@ -97,27 +97,27 @@ export class GlasnosticConsole {
         return this.loginStatus;
     }
 
-    async getEnvironments(): Promise<GlasnosticEnvironment[]> {
+    async getEnvironments(): Promise<Environment[]> {
         if (this.loginStatus === null) {
             throw new Error('you are not logged in');
         }
         const environmentUrl = new URL('/api/assemblies/user', this.apiDomain);
         return await got
             .get(environmentUrl, { cookieJar: this.cookieJar })
-            .json<GlasnosticEnvironment[]>();
+            .json<Environment[]>();
     }
 
-    async getView(environmentKey: string, viewId: string): Promise<GlasnosticView | false> {
+    async getView(environmentKey: string, viewId: string): Promise<View | false> {
         const channels = await this.getViews(environmentKey);
         return channels.find((ch) => ch.id === viewId) || false;
     }
 
-    async getViews(environmentKey: string): Promise<GlasnosticView[]> {
+    async getViews(environmentKey: string): Promise<View[]> {
         const listUrl = new URL('/api/channels', this.apiDomain);
         listUrl.searchParams.set('assemblyKey', environmentKey);
         const { channels } = await got
             .get(listUrl, { cookieJar: this.cookieJar })
-            .json<{ channels: GlasnosticView[] }>();
+            .json<{ channels: View[] }>();
         return channels;
     }
 
@@ -127,14 +127,14 @@ export class GlasnosticConsole {
         source: string,
         destination: string,
         policies?: Policies
-    ): Promise<GlasnosticView> {
-        const view: GlasnosticViewSnapshot = {
+    ): Promise<View> {
+        const view: ViewSnapshot = {
             clients: source,
             services: destination,
             name,
             policies,
         };
-        return await this.commitView(environmentKey, GlasnosticCommitAction.create, view);
+        return await this.commitView(environmentKey, CommitAction.create, view);
     }
 
     async updateView(
@@ -144,12 +144,12 @@ export class GlasnosticConsole {
         source: string | undefined,
         destination: string | undefined,
         policies: Policies | undefined
-    ): Promise<GlasnosticView> {
+    ): Promise<View> {
         const originalView = await this.getView(environmentKey, viewId);
         if (!originalView) {
             throw new Error('view not found');
         }
-        const view: GlasnosticViewSnapshot = {
+        const view: ViewSnapshot = {
             id: originalView.id,
             name: originalView.name,
             clients: originalView.clients,
@@ -174,7 +174,7 @@ export class GlasnosticConsole {
             view.policies = policies;
         }
 
-        return await this.commitView(environmentKey, GlasnosticCommitAction.update, view);
+        return await this.commitView(environmentKey, CommitAction.update, view);
     }
 
     async deleteView(environmentKey: string, viewId: string): Promise<void> {
@@ -182,28 +182,28 @@ export class GlasnosticConsole {
         if (!originalView) {
             throw new Error('view not found');
         }
-        return await this.commitView(environmentKey, GlasnosticCommitAction.delete, originalView);
+        return await this.commitView(environmentKey, CommitAction.delete, originalView);
     }
 
     private async commitView(
         environmentKey: string,
-        action: GlasnosticCommitAction.delete,
-        view: GlasnosticViewSnapshot
+        action: CommitAction.delete,
+        view: ViewSnapshot
     ): Promise<void>;
     private async commitView(
         environmentKey: string,
-        action: GlasnosticCommitAction,
-        view: GlasnosticViewSnapshot
-    ): Promise<GlasnosticView>;
+        action: CommitAction,
+        view: ViewSnapshot
+    ): Promise<View>;
     private async commitView(
         environmentKey: string,
-        action: GlasnosticCommitAction,
-        view: GlasnosticViewSnapshot
-    ): Promise<GlasnosticView | void> {
+        action: CommitAction,
+        view: ViewSnapshot
+    ): Promise<View | void> {
         interface CommitPayload {
             assemblyKey: string;
-            action: GlasnosticCommitAction;
-            channel: Partial<GlasnosticView>;
+            action: CommitAction;
+            channel: Partial<View>;
             lastCommitId?: string;
         }
 
@@ -213,11 +213,11 @@ export class GlasnosticConsole {
             action,
             channel: view,
         };
-        if (action === GlasnosticCommitAction.delete) {
+        if (action === CommitAction.delete) {
             payload.channel = { id: view.id };
             payload.lastCommitId = view.commitId;
         }
-        if (action === GlasnosticCommitAction.update) {
+        if (action === CommitAction.update) {
             payload.lastCommitId = view.commitId;
         }
         const option = {
@@ -225,8 +225,8 @@ export class GlasnosticConsole {
             json: payload,
         };
 
-        const resultView = await got.post(commitUrl, option).json<GlasnosticView>();
-        return action === GlasnosticCommitAction.delete ? undefined : resultView;
+        const resultView = await got.post(commitUrl, option).json<View>();
+        return action === CommitAction.delete ? undefined : resultView;
     }
 
     async getMetrics(environmentKey: string, samplePeriod?: number, duration?: number, start?: number): Promise<MetricsResponse> {
