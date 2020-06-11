@@ -3,51 +3,35 @@ import { default as got } from 'got';
 import { isNil } from 'lodash';
 import { PolicyHistory } from './policy-history';
 import { Policies } from './policies';
+import { GlasnosticView } from './view';
+import { GlasnosticEnvironment } from './environment';
 
 export * from './policies';
 export * from './metric-types';
 export * from './policy-history';
+export * from './view';
+export * from './environment';
 
 const defaultBaseDomain = 'https://glasnostic.com';
 
-export interface LoginStatus {
-    username: string;
-}
-
-export interface GlasnosticEnvironment {
-    id: string;
-    key: string;
-    switch: boolean;
-    userId: string;
-    name: string;
-    description: string;
-    simulator?: string;
-    createdAt: Date | string;
-    modifiedAt: Date | string;
-    deletedAt: Date | string;
-    clusters: any;
-}
-
-export enum GlasnosticCommitAction {
+enum GlasnosticCommitAction {
     create = 1,
     update = 2,
     delete = 3,
 }
 
-export interface GlasnosticView {
+interface GlasnosticViewSnapshot {
     clients: string;
     services: string;
     name?: string;
     id?: string;
-    index?: string;
     policies?: Policies;
-    policyHistory?: PolicyHistory;
     handlers?: any[];
-    createdAt?: string;
-    deletedAt?: string;
-    modifiedAt?: string;
-    committedAt?: string;
     commitId?: string;
+}
+
+export interface LoginStatus {
+    username: string;
 }
 
 export class GlasnosticConsole {
@@ -142,7 +126,7 @@ export class GlasnosticConsole {
         destination: string,
         policies?: Policies
     ): Promise<GlasnosticView> {
-        const view: GlasnosticView = {
+        const view: GlasnosticViewSnapshot = {
             clients: source,
             services: destination,
             name,
@@ -163,7 +147,7 @@ export class GlasnosticConsole {
         if (!originalView) {
             throw new Error('view not found');
         }
-        const view: GlasnosticView = {
+        const view: GlasnosticViewSnapshot = {
             id: originalView.id,
             name: originalView.name,
             clients: originalView.clients,
@@ -174,9 +158,6 @@ export class GlasnosticConsole {
                 : {},
             commitId: originalView.commitId,
         };
-        if (originalView.policyHistory) {
-            view.policies = PolicyHistory.activePolicies(originalView.policyHistory);
-        }
 
         if (!isNil(name)) {
             view.name = name;
@@ -187,8 +168,8 @@ export class GlasnosticConsole {
         if (!isNil(destination)) {
             view.services = destination;
         }
-        if (!isNil(policies) && !isNil(view.policies)) {
-            view.policies = Policies.merge(view.policies, policies);
+        if (!isNil(policies)) {
+            view.policies = policies;
         }
 
         return await this.commitView(environmentKey, GlasnosticCommitAction.update, view);
@@ -205,25 +186,27 @@ export class GlasnosticConsole {
     private async commitView(
         environmentKey: string,
         action: GlasnosticCommitAction.delete,
-        view: GlasnosticView
+        view: GlasnosticViewSnapshot
     ): Promise<void>;
     private async commitView(
         environmentKey: string,
         action: GlasnosticCommitAction,
-        view: GlasnosticView
+        view: GlasnosticViewSnapshot
     ): Promise<GlasnosticView>;
     private async commitView(
         environmentKey: string,
         action: GlasnosticCommitAction,
-        view: GlasnosticView
+        view: GlasnosticViewSnapshot
     ): Promise<GlasnosticView | void> {
-        const commitUrl = new URL('/api/channels/commit', this.apiDomain);
-        const payload: {
+        interface CommitPayload {
             assemblyKey: string;
             action: GlasnosticCommitAction;
             channel: Partial<GlasnosticView>;
             lastCommitId?: string;
-        } = {
+        }
+
+        const commitUrl = new URL('/api/channels/commit', this.apiDomain);
+        const payload: CommitPayload = {
             assemblyKey: environmentKey,
             action,
             channel: view,
