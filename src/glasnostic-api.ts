@@ -102,23 +102,21 @@ export class GlasnosticConsole {
             throw new Error('you are not logged in');
         }
         const environmentUrl = new URL('/api/assemblies/user', this.apiDomain);
-        return await got
-            .get(environmentUrl, { cookieJar: this.cookieJar })
-            .json<Environment[]>();
+        return await got.get(environmentUrl, { cookieJar: this.cookieJar }).json<Environment[]>();
     }
 
     async getView(environmentKey: string, viewId: string): Promise<View | false> {
-        const channels = await this.getViews(environmentKey);
-        return channels.find((ch) => ch.id === viewId) || false;
+        const views = await this.getViews(environmentKey);
+        return views.find((ch) => ch.id === viewId) || false;
     }
 
     async getViews(environmentKey: string): Promise<View[]> {
         const listUrl = new URL('/api/channels', this.apiDomain);
         listUrl.searchParams.set('assemblyKey', environmentKey);
-        const { channels } = await got
+        const { channels: views } = await got
             .get(listUrl, { cookieJar: this.cookieJar })
             .json<{ channels: View[] }>();
-        return channels;
+        return views;
     }
 
     async createView(
@@ -229,7 +227,12 @@ export class GlasnosticConsole {
         return action === CommitAction.delete ? undefined : resultView;
     }
 
-    async getMetrics(environmentKey: string, samplePeriod?: number, duration?: number, start?: number): Promise<MetricsResponse> {
+    async getMetrics(
+        environmentKey: string,
+        samplePeriod?: number,
+        duration?: number,
+        start?: number
+    ): Promise<MetricsResponse> {
         const metricsUrl = new URL('/api/metrics/assembly', this.apiDomain);
         metricsUrl.searchParams.set('key', environmentKey);
         if (!isNil(start)) {

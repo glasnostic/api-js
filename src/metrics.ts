@@ -2,7 +2,7 @@ import { MetricTypes } from './metric-types';
 
 export type MetricsHistory = {
     [m in MetricTypes]: Array<number>;
-}
+};
 
 export type MetricsRouteSpec = [string, string];
 
