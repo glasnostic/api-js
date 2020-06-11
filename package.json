@@ -15,7 +15,7 @@
   },
   "engines": { "node": ">= 10.0.0" },
   "author": "zjwu <zjwu@glasnostic.com>",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "devDependencies": {
     "@types/lodash": "^4.14.155",
     "@types/tough-cookie": "^4.0.0",
