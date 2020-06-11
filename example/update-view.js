@@ -1,10 +1,10 @@
-import { GlasnosticConsole } from '../src/glasnostic-api';
+const { GlasnosticConsole } = require('../dist/glasnostic-api');
 
 (async () => {
     const api = new GlasnosticConsole({
-      // use the same credentials that you are using to sign in to https://glasnostic.com/signin
-      username: 'testuser',
-      password: 'changeme'
+        // use the same credentials that you are using to sign in to https://glasnostic.com/signin
+        username: 'testuser',
+        password: 'changeme',
     });
     const { username } = await api.login();
     console.log(`logged as ${username}`);
@@ -17,4 +17,13 @@ import { GlasnosticConsole } from '../src/glasnostic-api';
         requests: { policyValue: 10000 },
     });
     console.log('created view:', view);
+    const updatedView = await api.updateView(
+        environments[1].key,
+        view.id,
+        'Updated Name',
+        undefined,
+        undefined,
+        undefined
+    );
+    console.log('updated view:', updatedView);
 })();

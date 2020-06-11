@@ -2,21 +2,27 @@
   "name": "glasnostic-api",
   "version": "1.0.0",
   "description": "",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "main": "dist/glasnostic-api.js",
   "scripts": {
-    "build": "tsc && tsc -p example/tsconfig.json",
+    "build": "rollup -c",
     "format": "tslint --force --fix -p . && prettier --write src/**/* example/**/*",
     "lint": "tslint -p . && prettier -c src/**/* example/**/*",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "engines": { "node": ">= 10.0.0" },
+  "engines": {
+    "node": ">= 10.0.0"
+  },
   "author": "zjwu <zjwu@glasnostic.com>",
   "license": "MIT",
   "devDependencies": {
+    "@rollup/plugin-typescript": "^4.1.2",
     "@types/lodash": "^4.14.155",
     "@types/tough-cookie": "^4.0.0",
     "prettier": "^2.0.5",
+    "rollup": "^2.15.0",
     "tslint": "^6.1.2",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.9.3"
