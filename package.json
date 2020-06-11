@@ -5,10 +5,7 @@
   "files": ["dist/**/*"],
   "main": "dist/glasnostic-api.js",
   "scripts": {
-    "build": "tsc",
-    "build:example": "tsc -p example/tsconfig.json",
-    "run-example:create-view": "node example/build/example/create-view.js",
-    "run-example:update-view": "node example/build/example/update-view.js",
+    "build": "tsc && tsc -p example/tsconfig.json",
     "format": "tslint --force --fix -p . && prettier --write src/**/* example/**/*",
     "lint": "tslint -p . && prettier -c src/**/* example/**/*",
     "test": "echo \"Error: no test specified\" && exit 1"
