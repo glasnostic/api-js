@@ -7,7 +7,7 @@ const { GlasnosticConsole } = require('../dist/glasnostic-api');
         password: 'changeme',
     });
     const { username } = await api.login();
-    console.log(`logged as ${username}`);
+    console.log(`logged in as ${username}`);
     const environments = await api.getEnvironments();
     console.log(
         'environment keys:',
