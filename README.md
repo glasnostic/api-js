@@ -2,12 +2,12 @@ Glasnostic Javascript API
 =========================
 
 Javascript wrapper for the Glasnostic Rest API. 
-Provides methods to create, update and delete Glasnostic views.
+Provides methods to create, update and delete Glasnostic views and to retrieve metrics.
 
 Usage
 -----
 
-See `/example` for use cases to create and update views.
+See `/example` folder for use cases to retrieve metrics and create and update views.
 
 Build
 -----
@@ -23,4 +23,5 @@ Run Examples
 ```
 node example/create-view.js
 node example/update-view.js
+node example/get-metrics.js
 ```

@@ -1,4 +1,4 @@
-export interface GlasnosticEnvironment {
+export interface Environment {
     id: string;
     key: string;
     switch: boolean;
