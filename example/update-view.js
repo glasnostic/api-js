@@ -19,7 +19,7 @@ const { GlasnosticConsole } = require('../dist/glasnostic-api');
     console.log('created view:', view);
     const updatedView = await api.updateView(
         environments[1].key,
-        view.id,
+        view.index,
         'Updated Name',
         undefined,
         undefined,

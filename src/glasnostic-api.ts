@@ -105,9 +105,9 @@ export class GlasnosticConsole {
         return await got.get(environmentUrl, { cookieJar: this.cookieJar }).json<Environment[]>();
     }
 
-    async getView(environmentKey: string, viewId: string): Promise<View | false> {
+    async getView(environmentKey: string, viewIndex: string): Promise<View | false> {
         const views = await this.getViews(environmentKey);
-        return views.find((ch) => ch.id === viewId) || false;
+        return views.find((ch) => ch.index === viewIndex) || false;
     }
 
     async getViews(environmentKey: string): Promise<View[]> {
@@ -137,13 +137,13 @@ export class GlasnosticConsole {
 
     async updateView(
         environmentKey: string,
-        viewId: string,
+        viewIndex: string,
         name: string | undefined,
         source: string | undefined,
         destination: string | undefined,
         policies: Policies | undefined
     ): Promise<View> {
-        const originalView = await this.getView(environmentKey, viewId);
+        const originalView = await this.getView(environmentKey, viewIndex);
         if (!originalView) {
             throw new Error('view not found');
         }
@@ -175,8 +175,8 @@ export class GlasnosticConsole {
         return await this.commitView(environmentKey, CommitAction.update, view);
     }
 
-    async deleteView(environmentKey: string, viewId: string): Promise<void> {
-        const originalView = await this.getView(environmentKey, viewId);
+    async deleteView(environmentKey: string, viewIndex: string): Promise<void> {
+        const originalView = await this.getView(environmentKey, viewIndex);
         if (!originalView) {
             throw new Error('view not found');
         }
