@@ -1,12 +1,12 @@
 import { CookieJar } from 'tough-cookie';
 import { default as got } from 'got';
 import { isNil } from 'lodash';
+import { makeRe } from 'minimatch';
 import { PolicyHistory } from './policy-history';
 import { Policies } from './policies';
 import { View } from './view';
 import { Environment } from './environment';
-import { MetricsResponse } from './metrics';
-import {RouteMetric} from "./metrics";
+import { RouteMetric, MetricsResponse, MetricsNodeMap, MetricsRouteHistory, MetricsRouteSpec } from './metrics';
 
 export * from './policies';
 export * from './metric-types';
@@ -267,5 +267,63 @@ export class GlasnosticConsole {
         };
 
         return got.post(url, options).json<any>();
+    }
+
+    private filterMetricsByView(
+        nodes: MetricsNodeMap,
+        routes: MetricsRouteHistory[],
+        source: string,
+        destination: string
+    ): MetricsRouteHistory[] {
+        interface Name {
+            src: string;
+            dst: string;
+        }
+        const parsePatterns = (patterns: string): RegExp[] => {
+            return patterns
+                .split(',')
+                .map((s) => makeRe(s.trim()))
+                .filter((p) => !!p);
+        };
+        const match = (patterns: RegExp[], subject: string): boolean => {
+            return patterns.some((p) => p.test(subject));
+        };
+        const lookupName = (spec: MetricsRouteSpec, nodes: MetricsNodeMap): Name => {
+            const routeNodes = spec.map((s) => nodes[s]);
+            const [src, dst] = routeNodes.map((n) =>
+                [n?.name, n?.instance].filter((s) => !!s).join(' ')
+            );
+            return { src, dst };
+        };
+
+        const srcPatterns = parsePatterns(source);
+        const dstPatterns = parsePatterns(destination);
+        return routes.filter((route) => {
+            const { src, dst } = lookupName(route.spec, nodes);
+            return match(srcPatterns, src) && match(dstPatterns, dst);
+        });
+    }
+
+    async getViewMetrics(
+        environmentKey: string,
+        viewIndex: string,
+        samplePeriod?: number,
+        duration?: number,
+        start?: number
+    ): Promise<MetricsResponse> {
+        const getMetrics = this.getMetrics(environmentKey, samplePeriod, duration, start);
+        const getView = this.getView(environmentKey, viewIndex);
+        const [res, view] = await Promise.all([getMetrics, getView]);
+        if (!view) {
+            throw new Error('view not found');
+        }
+        if (!res.nodes || !res.routes) {
+            return res;
+        }
+        const routes = this.filterMetricsByView(res.nodes, res.routes, view.clients, view.services);
+        return {
+            ...res,
+            routes,
+        };
     }
 }
