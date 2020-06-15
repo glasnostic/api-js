@@ -6,6 +6,7 @@ import { Policies } from './policies';
 import { View } from './view';
 import { Environment } from './environment';
 import { MetricsResponse } from './metrics';
+import {RouteMetric} from "./metrics";
 
 export * from './policies';
 export * from './metric-types';
@@ -246,5 +247,25 @@ export class GlasnosticConsole {
         }
 
         return await got.get(metricsUrl, { cookieJar: this.cookieJar }).json<MetricsResponse>();
+    }
+
+    async sendMetric(
+        networkKey: string,
+        time: Date,
+        routeMetrics: Array<RouteMetric>,
+    ): Promise<any> {
+        const url = new URL('/api/collector/metrics', this.apiDomain);
+
+        const payload = {
+            "timestamp": time.toISOString(),
+            "key": networkKey,
+            "routeMetricsList": routeMetrics,
+        }
+        const options = {
+            cookieJar: this.cookieJar,
+            json: payload,
+        };
+
+        return got.post(url, options).json<any>();
     }
 }
