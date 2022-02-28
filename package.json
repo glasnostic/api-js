@@ -30,8 +30,8 @@
   },
   "dependencies": {
     "got": "^11.2.0",
-    "lodash": "^4.17.15",
     "minimatch": "^3.0.4",
+    "lodash": "^4.17.21",
     "tough-cookie": "^4.0.0"
   }
 }

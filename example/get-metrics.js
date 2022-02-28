@@ -14,7 +14,7 @@ const { GlasnosticConsole } = require('../dist/glasnostic-api');
     const view = await api.createView(environments[0].key, 'My Channel', 'source', 'destination');
     console.log('created view:', view);
     // send metric data to the first network in the first environment
-    const networkKey = environments[0].clusters[0].key;
+    const networkId = environments[0].clusters[0].key;
     const metric = [{
         "route": {
             "source": {"name": "source", "instance": "0"},
@@ -27,7 +27,7 @@ const { GlasnosticConsole } = require('../dist/glasnostic-api');
             "latency": 4
         }
     }];
-    await api.sendMetric(networkKey, new Date(), metric);
+    await api.sendMetric(networkId, new Date(), metric);
     console.log('metric sent.');
     // gets data from the last minute (=60000 milliseconds) in 10s samples (=10000 milliseconds)
     const metrics = await api.getViewMetrics(environments[0].key, view.index,10000, 60000);

@@ -250,7 +250,7 @@ export class GlasnosticConsole {
     }
 
     async sendMetric(
-        networkKey: string,
+        networkId: string,
         time: Date,
         routeMetrics: Array<RouteMetric>,
     ): Promise<any> {
@@ -258,7 +258,7 @@ export class GlasnosticConsole {
 
         const payload = {
             "timestamp": time.toISOString(),
-            "key": networkKey,
+            "key": networkId,
             "routeMetricsList": routeMetrics,
         }
         const options = {
