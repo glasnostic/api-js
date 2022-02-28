@@ -10,6 +10,9 @@ const { GlasnosticConsole } = require('../dist/glasnostic-api');
     console.log(`logged in as ${username}`);
     const environments = await api.getEnvironments();
 
+    // create a view that is capturing the traffic
+    const view = await api.createView(environments[0].key, 'My Channel', 'source', 'destination');
+    console.log('created view:', view);
     // send metric data to the first network in the first environment
     const networkId = environments[0].clusters[0].key;
     const metric = [{
@@ -27,12 +30,12 @@ const { GlasnosticConsole } = require('../dist/glasnostic-api');
     await api.sendMetric(networkId, new Date(), metric);
     console.log('metric sent.');
     // gets data from the last minute (=60000 milliseconds) in 10s samples (=10000 milliseconds)
-    const metrics = await api.getMetrics(environments[0].key, 10000, 60000);
+    const metrics = await api.getViewMetrics(environments[0].key, view.index,10000, 60000);
     console.log('initial metrics:', metrics);
     // send 2nd metric
     await api.sendMetric(environments[0].clusters[0].key, new Date(), metric);
     console.log('2nd metric sent.');
-    // get 20s of metrics after the last time getMetrics was called
-    const incrementalMetrics = await api.getMetrics(environments[0].key, 10000, 20000, metrics.window.start);
+    // get 30s of metrics after the last time getViewMetrics was called
+    const incrementalMetrics = await api.getViewMetrics(environments[0].key, view.index,10000, 30000, metrics.window.start);
     console.log('metrics update:', incrementalMetrics);
 })();

@@ -10,7 +10,8 @@ export default {
   external: [
     'got',
     'tough-cookie',
-    'lodash'
+    'lodash',
+    'minimatch'
   ],
   plugins: [typescript({
     declaration: true,
