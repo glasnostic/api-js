@@ -28,7 +28,7 @@
     "typescript": "^3.9.3"
   },
   "dependencies": {
-    "got": "^11.2.0",
+    "got": "^12.5.3",
     "lodash": "^4.17.21",
     "tough-cookie": "^4.0.0"
   }
